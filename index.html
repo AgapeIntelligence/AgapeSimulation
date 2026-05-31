@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>SMRS-Φₒ Agape Field</title>
+<style>
+html, body { margin: 0; overflow: hidden; background: black; }
+canvas { display: block; }
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<script>
+const canvas = document.getElementById("c");
+const ctx = canvas.getContext("2d");
+function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+window.addEventListener("resize", resize); resize();
+let particles = Array.from({length: 300}, () => ({x: Math.random()*canvas.width, y: Math.random()*canvas.height, vx: 0, vy: 0}));
+let mouse = { x: canvas.width/2, y: canvas.height/2, vx: 0, vy: 0 };
+window.addEventListener("mousemove", e => { mouse.x = e.clientX; mouse.y = e.clientY; });
+const cohesionStrength = 0.003;
+const damping = 0.95;
+function step() {
+  ctx.fillStyle = "rgba(0, 0, 0, 0.15)";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  for (let p of particles) {
+    let dx = mouse.x - p.x;
+    let dy = mouse.y - p.y;
+    let dist = Math.sqrt(dx*dx + dy*dy);
+    let force = cohesionStrength / (dist + 50);
+    p.vx += dx * force;
+    p.vy += dy * force;
+    p.vx *= damping;
+    p.vy *= damping;
+    p.x += p.vx;
+    p.y += p.vy;
+    let prox = Math.max(0, 1 - dist / 400);
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, 1 + prox * 1.5, 0, Math.PI * 2);
+    ctx.fillStyle = `rgba(${230 + prox * 25}, 240, 255, ${0.5 + prox * 0.5})`;
+    ctx.fill();
+  }
+  requestAnimationFrame(step);
+}
+step();
+</script>
+</body>
+</html>
